@@ -11,23 +11,47 @@ from typing import List, Tuple, Callable, Any, Optional
 class ImageLab:
     """
     图像处理实验室类
-    
+
     核心流水线管理类，维护处理步骤的中间结果，支持算法链的串联执行。
+    新增中间结果保存功能，避免重复计算。
     """
-    
+
     def __init__(self):
         """
         初始化ImageLab实例
-        
+
         pipeline_data格式: [(step_name, img), ...]
         每个元素是一个元组，包含步骤名称和对应的图片数组
         """
         self.pipeline_data: List[Tuple[str, np.ndarray]] = []
+        self.intermediate_results: dict = {}  # 保存中间计算结果
     
+    def save_intermediate_result(self, key: str, data: Any) -> None:
+        """
+        保存中间计算结果
+
+        Args:
+            key: 结果的键名
+            data: 要保存的数据
+        """
+        self.intermediate_results[key] = data
+
+    def get_intermediate_result(self, key: str) -> Any:
+        """
+        获取中间计算结果
+
+        Args:
+            key: 结果的键名
+
+        Returns:
+            保存的数据，如果不存在返回None
+        """
+        return self.intermediate_results.get(key)
+
     def record(self, name: str, img: np.ndarray) -> None:
         """
         记录流水线中的中间结果
-        
+
         Args:
             name: 步骤名称（用于标识和可视化）
             img: 该步骤处理后的图片数组
@@ -60,6 +84,7 @@ class ImageLab:
         """
         # 清空之前的数据
         self.pipeline_data = []
+        self.intermediate_results = {}
         
         # 记录原始图片
         self.record("Original", img)
